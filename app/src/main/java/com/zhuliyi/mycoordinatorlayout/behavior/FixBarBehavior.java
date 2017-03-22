@@ -2,11 +2,13 @@ package com.zhuliyi.mycoordinatorlayout.behavior;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.os.Handler;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Scroller;
 
 import com.zhuliyi.mycoordinatorlayout.R;
 
@@ -18,10 +20,14 @@ import java.lang.ref.WeakReference;
 
 public class FixBarBehavior extends CoordinatorLayout.Behavior<ImageView> {
     int offsetTotal = 0;
-    boolean scrolling = false;
+    boolean isScrolling = false;
+    private Scroller scroller;
+    private Handler handler;
     private WeakReference<View>weakReference;
     public FixBarBehavior(Context context, AttributeSet attrs) {
         super(context, attrs);
+        scroller = new Scroller(context);
+        handler = new Handler();
     }
 
     @Override
@@ -55,6 +61,13 @@ public class FixBarBehavior extends CoordinatorLayout.Behavior<ImageView> {
     @Override
     public boolean onStartNestedScroll(CoordinatorLayout coordinatorLayout, ImageView child, View directTargetChild, View target, int nestedScrollAxes) {
         return (nestedScrollAxes & ViewCompat.SCROLL_AXIS_VERTICAL) != 0;
+    }
+
+    @Override
+    public void onNestedScrollAccepted(CoordinatorLayout coordinatorLayout, ImageView child, View directTargetChild, View target, int nestedScrollAxes) {
+        scroller.abortAnimation();
+        isScrolling = false;
+        super.onNestedScrollAccepted(coordinatorLayout, child, directTargetChild, target, nestedScrollAxes);
     }
 
     @Override
@@ -115,7 +128,8 @@ public class FixBarBehavior extends CoordinatorLayout.Behavior<ImageView> {
 
     private boolean onStopDragging(View child,float velocity){
         View dependencyView=getDependencyView();
-        if(dependencyView.getTranslationY()==0||dependencyView.getTranslationY()==child.getHeight())return false;
+        float tranY=dependencyView.getTranslationY();
+        if(tranY==0||tranY==child.getHeight())return false;
         boolean isShow;
         if(Math.abs(velocity)<800){
             if(dependencyView.getTranslationY()<child.getHeight()/2){
@@ -132,9 +146,24 @@ public class FixBarBehavior extends CoordinatorLayout.Behavior<ImageView> {
             }
         }
         float endTranY=isShow?child.getHeight():0;
-        startAnmintion(dependencyView,dependencyView.getTranslationY(),endTranY,velocity);
+        scroller.startScroll(0,(int) tranY,0,(int) (endTranY-tranY), (int) (1000000/(Math.abs(velocity))));
+        handler.post(flingRunnable);
+        isScrolling=true;
+//        startAnmintion(dependencyView,dependencyView.getTranslationY(),endTranY,velocity);
         return true;
     }
+
+    private Runnable flingRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (scroller.computeScrollOffset()) {
+                getDependencyView().setTranslationY(scroller.getCurrY());
+                handler.post(this);
+            } else {
+                isScrolling = false;
+            }
+        }
+    };
     private void startAnmintion(final View view, float startTranY, float endTranY,float velocity){
         ValueAnimator valueAnimator=ValueAnimator.ofFloat(startTranY,endTranY);
         valueAnimator.setDuration((long) (200000/(Math.abs(velocity))));
