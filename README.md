@@ -1,4 +1,2 @@
-CoordinatorLayout behavior的使用 
-======
 
-![](https://github.com/zhuliyi10/MyCoordinatorLayout/blob/master/screen/pic1.gif)  
+[CoordinatorLayout的AppBarLayout使用](https://www.jianshu.com/p/bfd9b134ef84)

@@ -9,20 +9,18 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".MainActivity">
+
+        </activity>
+        <activity
+            android:name=".ScrollingActivity"
+            android:label="@string/title_activity_scrolling"></activity>
+        <activity android:name=".TextButtonBehaviorActivity"/>
+        <activity android:name=".appbarlayout.AppBarActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-        <activity
-            android:name=".ScrollingActivity"
-            android:label="@string/title_activity_scrolling">
-
-        </activity>
-
-        <activity android:name=".TextButtonBehaviorActivity">
-
         </activity>
     </application>
 
